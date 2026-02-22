@@ -46,6 +46,8 @@ git clone https://github.com/cyberviser/Hancock.git
 cd Hancock && make setup
 python hancock_agent.py --server
 # POST http://localhost:5000/v1/triage  {"alert": "..."}
+# All API POST requests require scope acknowledgement: include {"scope": "authorized"}
+# or set env HANCOCK_SCOPE_ACK=authorized (set HANCOCK_REQUIRE_SCOPE_ACK=0 to disable).
 ```
 
 ---
