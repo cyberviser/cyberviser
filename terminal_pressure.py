@@ -15,8 +15,8 @@ import time
 import os
 
 SCOPE_TOKEN = os.getenv("TERMINAL_PRESSURE_SCOPE_VALUE", "authorized").strip().lower()
-SCOPE_ACK_ENV = os.getenv("TERMINAL_PRESSURE_SCOPE_ACK",
-                          os.getenv("TERMINAL_PRESSURE_ACK", "")).strip().lower()
+SCOPE_ACK_VALUE = os.getenv("TERMINAL_PRESSURE_SCOPE_ACK",
+                            os.getenv("TERMINAL_PRESSURE_ACK", "")).strip().lower()
 
 def scan_vulns(target):
     scanner = nmap.PortScanner()
@@ -82,7 +82,7 @@ def main():
 
     args = parser.parse_args()
 
-    if not args.scope_ack and SCOPE_ACK_ENV != SCOPE_TOKEN:
+    if not args.scope_ack and SCOPE_ACK_VALUE != SCOPE_TOKEN:
         try:
             ack = input(f"Authorized use only. Type '{SCOPE_TOKEN}' to proceed: ").strip().lower()
         except (EOFError, KeyboardInterrupt):

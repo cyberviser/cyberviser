@@ -250,7 +250,7 @@ BANNER = """
 
 
 def _scope_token() -> str:
-    """Required scope acknowledgment token (lowercase)."""
+    """Required scope acknowledgement token (lowercase)."""
     return os.getenv("HANCOCK_SCOPE_VALUE", "authorized").strip().lower()
 
 
@@ -466,14 +466,14 @@ def build_app(client, model: str):
         g.rate_remaining = remaining
         return True, "", remaining
 
-    def _check_scope(payload: dict) -> "tuple[bool, str]":
-        """Require explicit authorized-use scope, unless globally disabled."""
+    def _check_scope_ack(payload: dict) -> "tuple[bool, str]":
+        """Require explicit authorized-use acknowledgement, unless disabled."""
         if not REQUIRE_SCOPE_ACK:
             return True, ""
         if _scope_ack_env():
             return True, ""
         if not isinstance(payload, dict):
-            return False, "Invalid JSON payload"
+            return False, "Request payload must be a JSON object"
         token = _scope_token()
         provided = (payload.get("scope") or "").strip().lower()
         if provided != token:
@@ -539,7 +539,7 @@ def build_app(client, model: str):
             return jsonify({"error": err}), 401 if "Unauthorized" in err else 429
         _inc("requests_total"); _inc("requests_by_endpoint", "/v1/chat")
         data = request.get_json(force=True)
-        ok_scope, scope_err = _check_scope(data)
+        ok_scope, scope_err = _check_scope_ack(data)
         if not ok_scope:
             _inc("errors_total"); return jsonify({"error": scope_err}), 403
         user_msg = data.get("message", "")
@@ -592,7 +592,7 @@ def build_app(client, model: str):
             _inc("errors_total"); return jsonify({"error": err}), 401 if "Unauthorized" in err else 429
         _inc("requests_total"); _inc("requests_by_endpoint", "/v1/ask")
         data = request.get_json(force=True)
-        ok_scope, scope_err = _check_scope(data)
+        ok_scope, scope_err = _check_scope_ack(data)
         if not ok_scope:
             _inc("errors_total"); return jsonify({"error": scope_err}), 403
         question = data.get("question", "")
@@ -619,7 +619,7 @@ def build_app(client, model: str):
             _inc("errors_total"); return jsonify({"error": err}), 401 if "Unauthorized" in err else 429
         _inc("requests_total"); _inc("requests_by_endpoint", "/v1/triage"); _inc("requests_by_mode", "soc")
         data  = request.get_json(force=True)
-        ok_scope, scope_err = _check_scope(data)
+        ok_scope, scope_err = _check_scope_ack(data)
         if not ok_scope:
             _inc("errors_total"); return jsonify({"error": scope_err}), 403
         alert = data.get("alert", "")
@@ -649,7 +649,7 @@ def build_app(client, model: str):
             _inc("errors_total"); return jsonify({"error": err}), 401 if "Unauthorized" in err else 429
         _inc("requests_total"); _inc("requests_by_endpoint", "/v1/hunt"); _inc("requests_by_mode", "soc")
         data   = request.get_json(force=True)
-        ok_scope, scope_err = _check_scope(data)
+        ok_scope, scope_err = _check_scope_ack(data)
         if not ok_scope:
             _inc("errors_total"); return jsonify({"error": scope_err}), 403
         target = data.get("target", "")
@@ -680,7 +680,7 @@ def build_app(client, model: str):
             _inc("errors_total"); return jsonify({"error": err}), 401 if "Unauthorized" in err else 429
         _inc("requests_total"); _inc("requests_by_endpoint", "/v1/respond"); _inc("requests_by_mode", "soc")
         data          = request.get_json(force=True)
-        ok_scope, scope_err = _check_scope(data)
+        ok_scope, scope_err = _check_scope_ack(data)
         if not ok_scope:
             _inc("errors_total"); return jsonify({"error": scope_err}), 403
         incident_type = data.get("incident", "")
@@ -710,7 +710,7 @@ def build_app(client, model: str):
             _inc("errors_total"); return jsonify({"error": err}), 401 if "Unauthorized" in err else 429
         _inc("requests_total"); _inc("requests_by_endpoint", "/v1/code"); _inc("requests_by_mode", "code")
         data     = request.get_json(force=True)
-        ok_scope, scope_err = _check_scope(data)
+        ok_scope, scope_err = _check_scope_ack(data)
         if not ok_scope:
             _inc("errors_total"); return jsonify({"error": scope_err}), 403
         task     = data.get("task", "")
@@ -745,7 +745,7 @@ def build_app(client, model: str):
             _inc("errors_total"); return jsonify({"error": err}), 401 if "Unauthorized" in err else 429
         _inc("requests_total"); _inc("requests_by_endpoint", "/v1/ciso"); _inc("requests_by_mode", "ciso")
         data     = request.get_json(force=True)
-        ok_scope, scope_err = _check_scope(data)
+        ok_scope, scope_err = _check_scope_ack(data)
         if not ok_scope:
             _inc("errors_total"); return jsonify({"error": scope_err}), 403
         question = data.get("question", "") or data.get("query", "") or data.get("message", "")
@@ -785,7 +785,7 @@ def build_app(client, model: str):
             _inc("errors_total"); return jsonify({"error": err}), 401 if "Unauthorized" in err else 429
         _inc("requests_total"); _inc("requests_by_endpoint", "/v1/sigma"); _inc("requests_by_mode", "sigma")
         data        = request.get_json(force=True)
-        ok_scope, scope_err = _check_scope(data)
+        ok_scope, scope_err = _check_scope_ack(data)
         if not ok_scope:
             _inc("errors_total"); return jsonify({"error": scope_err}), 403
         description = data.get("description", "") or data.get("ttp", "") or data.get("query", "")
@@ -834,7 +834,7 @@ def build_app(client, model: str):
             _inc("errors_total"); return jsonify({"error": err}), 401 if "Unauthorized" in err else 429
         _inc("requests_total"); _inc("requests_by_endpoint", "/v1/yara"); _inc("requests_by_mode", "yara")
         data        = request.get_json(force=True)
-        ok_scope, scope_err = _check_scope(data)
+        ok_scope, scope_err = _check_scope_ack(data)
         if not ok_scope:
             _inc("errors_total"); return jsonify({"error": scope_err}), 403
         description = data.get("description", "") or data.get("malware", "") or data.get("query", "")
@@ -883,7 +883,7 @@ def build_app(client, model: str):
         _inc("requests_total"); _inc("requests_by_endpoint", "/v1/ioc"); _inc("requests_by_mode", "ioc")
 
         data = request.get_json(force=True)
-        ok_scope, scope_err = _check_scope(data)
+        ok_scope, scope_err = _check_scope_ack(data)
         if not ok_scope:
             _inc("errors_total"); return jsonify({"error": scope_err}), 403
         indicator = (data.get("indicator") or data.get("ioc") or data.get("query") or "").strip()
@@ -930,7 +930,7 @@ def build_app(client, model: str):
                 return jsonify({"error": "Invalid webhook signature"}), 401
 
         data     = request.get_json(force=True)
-        ok_scope, scope_err = _check_scope(data)
+        ok_scope, scope_err = _check_scope_ack(data)
         if not ok_scope:
             _inc("errors_total"); return jsonify({"error": scope_err}), 403
         alert    = data.get("alert", "")
