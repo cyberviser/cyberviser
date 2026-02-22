@@ -466,19 +466,32 @@ def build_app(client, model: str):
         g.rate_remaining = remaining
         return True, "", remaining
 
-    def _check_scope_ack(payload: dict) -> "tuple[bool, str]":
+    def validate_scope_ack(payload: dict) -> "tuple[bool, str]":
         """Require explicit authorized-use acknowledgement, unless disabled."""
         if not REQUIRE_SCOPE_ACK:
             return True, ""
         if _scope_ack_env():
             return True, ""
-        if not isinstance(payload, dict):
-            return False, "Request payload must be a JSON object"
         token = _scope_token()
         provided = (payload.get("scope") or "").strip().lower()
         if provided != token:
             return False, f"Authorized use only. Provide scope='{token}' in the request body."
         return True, ""
+
+    @app.before_request
+    def _enforce_scope_ack():
+        """Apply scope acknowledgement guard to all POST endpoints."""
+        if request.method != "POST":
+            return None
+        if request.path in ("/health", "/metrics"):
+            return None
+        data = request.get_json(force=True, silent=True)
+        if data is None:
+            _inc("errors_total"); return jsonify({"error": "Request payload must be a JSON object"}), 400
+        ok_scope, scope_err = validate_scope_ack(data)
+        if not ok_scope:
+            _inc("errors_total"); return jsonify({"error": scope_err}), 403
+        g.request_payload = data
 
     @app.after_request
     def _add_rate_headers(response):
@@ -538,10 +551,7 @@ def build_app(client, model: str):
             _inc("errors_total")
             return jsonify({"error": err}), 401 if "Unauthorized" in err else 429
         _inc("requests_total"); _inc("requests_by_endpoint", "/v1/chat")
-        data = request.get_json(force=True)
-        ok_scope, scope_err = _check_scope_ack(data)
-        if not ok_scope:
-            _inc("errors_total"); return jsonify({"error": scope_err}), 403
+        data = getattr(g, "request_payload", request.get_json(force=True))
         user_msg = data.get("message", "")
         history  = data.get("history", [])
         stream   = data.get("stream", False)
@@ -591,10 +601,7 @@ def build_app(client, model: str):
         if not ok:
             _inc("errors_total"); return jsonify({"error": err}), 401 if "Unauthorized" in err else 429
         _inc("requests_total"); _inc("requests_by_endpoint", "/v1/ask")
-        data = request.get_json(force=True)
-        ok_scope, scope_err = _check_scope_ack(data)
-        if not ok_scope:
-            _inc("errors_total"); return jsonify({"error": scope_err}), 403
+        data = getattr(g, "request_payload", request.get_json(force=True))
         question = data.get("question", "")
         mode     = data.get("mode", "auto")
         if not question:
@@ -618,10 +625,7 @@ def build_app(client, model: str):
         if not ok:
             _inc("errors_total"); return jsonify({"error": err}), 401 if "Unauthorized" in err else 429
         _inc("requests_total"); _inc("requests_by_endpoint", "/v1/triage"); _inc("requests_by_mode", "soc")
-        data  = request.get_json(force=True)
-        ok_scope, scope_err = _check_scope_ack(data)
-        if not ok_scope:
-            _inc("errors_total"); return jsonify({"error": scope_err}), 403
+        data  = getattr(g, "request_payload", request.get_json(force=True))
         alert = data.get("alert", "")
         if not alert:
             _inc("errors_total"); return jsonify({"error": "alert required"}), 400
@@ -648,10 +652,7 @@ def build_app(client, model: str):
         if not ok:
             _inc("errors_total"); return jsonify({"error": err}), 401 if "Unauthorized" in err else 429
         _inc("requests_total"); _inc("requests_by_endpoint", "/v1/hunt"); _inc("requests_by_mode", "soc")
-        data   = request.get_json(force=True)
-        ok_scope, scope_err = _check_scope_ack(data)
-        if not ok_scope:
-            _inc("errors_total"); return jsonify({"error": scope_err}), 403
+        data   = getattr(g, "request_payload", request.get_json(force=True))
         target = data.get("target", "")
         siem   = data.get("siem", "splunk")
         if not target:
@@ -679,10 +680,7 @@ def build_app(client, model: str):
         if not ok:
             _inc("errors_total"); return jsonify({"error": err}), 401 if "Unauthorized" in err else 429
         _inc("requests_total"); _inc("requests_by_endpoint", "/v1/respond"); _inc("requests_by_mode", "soc")
-        data          = request.get_json(force=True)
-        ok_scope, scope_err = _check_scope_ack(data)
-        if not ok_scope:
-            _inc("errors_total"); return jsonify({"error": scope_err}), 403
+        data          = getattr(g, "request_payload", request.get_json(force=True))
         incident_type = data.get("incident", "")
         if not incident_type:
             _inc("errors_total"); return jsonify({"error": "incident required"}), 400
@@ -709,10 +707,7 @@ def build_app(client, model: str):
         if not ok:
             _inc("errors_total"); return jsonify({"error": err}), 401 if "Unauthorized" in err else 429
         _inc("requests_total"); _inc("requests_by_endpoint", "/v1/code"); _inc("requests_by_mode", "code")
-        data     = request.get_json(force=True)
-        ok_scope, scope_err = _check_scope_ack(data)
-        if not ok_scope:
-            _inc("errors_total"); return jsonify({"error": scope_err}), 403
+        data     = getattr(g, "request_payload", request.get_json(force=True))
         task     = data.get("task", "")
         language = data.get("language", "")
         if not task:
@@ -744,10 +739,7 @@ def build_app(client, model: str):
         if not ok:
             _inc("errors_total"); return jsonify({"error": err}), 401 if "Unauthorized" in err else 429
         _inc("requests_total"); _inc("requests_by_endpoint", "/v1/ciso"); _inc("requests_by_mode", "ciso")
-        data     = request.get_json(force=True)
-        ok_scope, scope_err = _check_scope_ack(data)
-        if not ok_scope:
-            _inc("errors_total"); return jsonify({"error": scope_err}), 403
+        data     = getattr(g, "request_payload", request.get_json(force=True))
         question = data.get("question", "") or data.get("query", "") or data.get("message", "")
         context  = data.get("context", "")
         output   = data.get("output", "advice")
@@ -784,10 +776,7 @@ def build_app(client, model: str):
         if not ok:
             _inc("errors_total"); return jsonify({"error": err}), 401 if "Unauthorized" in err else 429
         _inc("requests_total"); _inc("requests_by_endpoint", "/v1/sigma"); _inc("requests_by_mode", "sigma")
-        data        = request.get_json(force=True)
-        ok_scope, scope_err = _check_scope_ack(data)
-        if not ok_scope:
-            _inc("errors_total"); return jsonify({"error": scope_err}), 403
+        data        = getattr(g, "request_payload", request.get_json(force=True))
         description = data.get("description", "") or data.get("ttp", "") or data.get("query", "")
         logsource   = data.get("logsource", "")    # e.g. "windows sysmon", "linux auditd", "aws cloudtrail"
         technique   = data.get("technique", "")    # e.g. "T1059.001" — auto-tagged if provided
@@ -833,10 +822,7 @@ def build_app(client, model: str):
         if not ok:
             _inc("errors_total"); return jsonify({"error": err}), 401 if "Unauthorized" in err else 429
         _inc("requests_total"); _inc("requests_by_endpoint", "/v1/yara"); _inc("requests_by_mode", "yara")
-        data        = request.get_json(force=True)
-        ok_scope, scope_err = _check_scope_ack(data)
-        if not ok_scope:
-            _inc("errors_total"); return jsonify({"error": scope_err}), 403
+        data        = getattr(g, "request_payload", request.get_json(force=True))
         description = data.get("description", "") or data.get("malware", "") or data.get("query", "")
         file_type   = data.get("file_type", "")   # e.g. "PE", "Office macro", "PDF", "script"
         sample_hash = data.get("hash", "")         # optional SHA256 for meta
@@ -882,10 +868,7 @@ def build_app(client, model: str):
             _inc("errors_total"); return jsonify({"error": err}), 401 if "Unauthorized" in err else 429
         _inc("requests_total"); _inc("requests_by_endpoint", "/v1/ioc"); _inc("requests_by_mode", "ioc")
 
-        data = request.get_json(force=True)
-        ok_scope, scope_err = _check_scope_ack(data)
-        if not ok_scope:
-            _inc("errors_total"); return jsonify({"error": scope_err}), 403
+        data = getattr(g, "request_payload", request.get_json(force=True))
         indicator = (data.get("indicator") or data.get("ioc") or data.get("query") or "").strip()
         ioc_type  = data.get("type", "auto")
         context   = data.get("context", "")
@@ -929,10 +912,7 @@ def build_app(client, model: str):
                 _inc("errors_total")
                 return jsonify({"error": "Invalid webhook signature"}), 401
 
-        data     = request.get_json(force=True)
-        ok_scope, scope_err = _check_scope_ack(data)
-        if not ok_scope:
-            _inc("errors_total"); return jsonify({"error": scope_err}), 403
+        data     = getattr(g, "request_payload", request.get_json(force=True))
         alert    = data.get("alert", "")
         source   = data.get("source", "unknown")
         severity = data.get("severity", "unknown")
