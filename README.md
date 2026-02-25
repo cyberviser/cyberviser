@@ -10,9 +10,8 @@
 ```
 
 **AI-powered cybersecurity. Built for operators.**
-
-[![Website](https://cyberviser.github.io/Hancock/index.html)](https://cyberviserai.com)
-[![Email](https://img.shields.io/badge/Contact-contact@cyberviser.ai-00e5ff?style=flat-square&logo=gmail)](mailto:contact@cyberviser.ai)
+[![Website](https://cyberviser.github.io/Hancock/index.html)]
+[![Email](https://img.shields.io/badge/Contact-contact@cyberviser.ai-00e5ff?style=flat-square&logo=gmail)](cyberviser@cyberviserai.com)
 
 </div>
 
