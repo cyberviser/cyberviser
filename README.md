@@ -14,6 +14,9 @@
 
 </div>
 
+
+
+<iframe src="https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:7433487692803346432?collapsed=1" height="508" width="504" frameborder="0" allowfullscreen="" title="Embedded post"></iframe>
 ---
 
 ### 🛡️ What We Build
