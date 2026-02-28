@@ -9,8 +9,15 @@
  ╚═════╝   ╚═╝   ╚═════╝ ╚══════╝╚═╝  ╚═╝  ╚═══╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝
 ```
 
+</div>
+
+
+<div align="center">
+
+```
 **AI-powered cybersecurity. Built for operators.**
 [![Email](https://img.shields.io/badge/Contact-contact@cyberviser.ai-00e5ff?style=flat-square&logo=gmail)](cyberviser@cyberviserai.com)
+```
 
 </div>
 
