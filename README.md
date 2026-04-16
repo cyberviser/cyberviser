@@ -1,5 +1,13 @@
 # Johnny Watters / 0AI
 
+<p align="center">
+  <a href="https://0ai-cyberviser.github.io/0ai/">
+    <img src="https://raw.githubusercontent.com/0ai-Cyberviser/0ai/main/assets/0ai-social-card.png" alt="0AI portfolio hub" width="100%">
+  </a>
+</p>
+
+<p align="center"><strong>https://0ai-cyberviser.github.io/0ai/</strong></p>
+
 `cyberviser`, `cyberviser-dotcom`, and `0ai-Cyberviser` are public GitHub identities operated by Johnny Watters.
 
 `0AI` is the company layer connecting these projects and accounts into one operating portfolio for AI, cybersecurity, and automation work.
