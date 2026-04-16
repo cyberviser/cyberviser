@@ -2,7 +2,7 @@
 
 This repository is part of the `0AI` company portfolio operated by Johnny Watters (`0ai-Cyberviser`).
 
-For general questions or portfolio contact:
+For general support or portfolio contact:
 
 - 0ai@cyberviserai.com
 - cyberviser@proton.me
