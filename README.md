@@ -21,6 +21,13 @@
 
 </div>
 
+<div align="center">
+
+Operated by **Johnny Watters** under the GitHub identities
+`cyberviser`, `cyberviser-dotcom`, and `0ai-Cyberviser`.
+
+</div>
+
 
 
 <iframe src="https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:7433487692803346432?collapsed=1" height="508" width="504" frameborder="0" allowfullscreen="" title="Embedded post"></iframe>
@@ -66,11 +73,12 @@ python hancock_agent.py --server
 
 ### 📬 Commercial Licensing
 
-All software is proprietary. For enterprise licensing, integrations, or partnerships:
-**contact@cyberviser.ai**
+CyberViser software and branding are operated by Johnny Watters
+(`0ai-Cyberviser`). For enterprise licensing, integrations, or partnerships:
+**0ai@cyberviserai.com** · **cyberviser@proton.me**
 
 ---
 
 <div align="center">
-  <sub>© 2026 CyberViser · All Rights Reserved · <a href="https://cyberviser.netlify.app">cyberviser.netlify.app</a></sub>
+  <sub>© 2026 Johnny Watters / CyberViser · All Rights Reserved · <a href="https://cyberviser.netlify.app">cyberviser.netlify.app</a></sub>
 </div>
